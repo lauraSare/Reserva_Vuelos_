@@ -1,5 +1,9 @@
 // Controlador de Tripulación — maneja el ABCC completo
 // Principio SOLID: Single Responsibility — solo maneja lógica de tripulación
+// Principio SOLID - Open/Closed: nuevas operaciones se agregan sin modificar las existentes
+// Principio SOLID - Interface Segregation: cada funcion expone solo lo necesario
+// Patron de diseño - Repository: abstrae el acceso a datos de tripulacion mediante Sequelize
+// Clean Code: funciones pequeñas con un solo proposito, mensajes de error descriptivos
 const { Tripulacion, Vuelo, VueloTripulacion } = require("../models/index");
 
 // ─── Obtener toda la tripulación ──────────────────────────────
