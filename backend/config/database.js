@@ -1,3 +1,7 @@
+// Principio SOLID - Single Responsibility: este archivo solo maneja la conexion a la BD
+// Patron de diseño - Singleton: una sola instancia de Sequelize en toda la aplicacion
+// Clean Code: variables de entorno para evitar datos sensibles en el codigo
+
 const { Sequelize } = require('sequelize');
 require('dotenv').config();
 
