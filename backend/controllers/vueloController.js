@@ -1,5 +1,9 @@
 // Controlador de Vuelos — maneja el ABCC completo
 // Principio SOLID: Single Responsibility — solo maneja lógica de vuelos
+// Principio SOLID - Open/Closed: nuevas operaciones se agregan sin modificar las existentes
+// Principio SOLID - Dependency Inversion: depende de modelos Sequelize no de consultas directas
+// Patron de diseño - Template Method: cada operacion ABCC sigue la misma estructura
+// Clean Code: funciones pequeñas, nombres descriptivos, manejo de errores consistente
 const { Vuelo, Ruta, Avion, Aeropuerto, Tripulacion, VueloTripulacion } = require("../models/index");
 const { Op } = require("sequelize");
 
