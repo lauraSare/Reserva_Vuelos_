@@ -1,3 +1,7 @@
+// Principio SOLID - Single Responsibility: este archivo solo define rutas de reservas
+// Principio SOLID - Open/Closed: nuevas rutas se agregan sin modificar las existentes
+// Patron de diseño - Chain of Responsibility: verificarSesion protege cada ruta antes del controlador
+// Clean Code: rutas claras con metodos HTTP correctos, GET obtener, POST crear, PUT actualizar, DELETE eliminar
 // Rutas de Reservas — ABCC completo
 // Seguridad: verificarSesion protege todas las rutas
 const express = require("express");
