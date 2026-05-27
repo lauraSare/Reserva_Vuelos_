@@ -1,5 +1,9 @@
 // Controlador de Pasajeros — maneja el ABCC completo
 // Principio SOLID: Single Responsibility — solo maneja lógica de pasajeros
+// Principio SOLID - Open/Closed: nuevas operaciones se agregan sin modificar las existentes
+// Principio SOLID - Liskov Substitution: cada funcion puede sustituirse sin afectar el sistema
+// Patron de diseño - Repository: abstrae el acceso a datos de pasajeros mediante Sequelize
+// Clean Code: funciones pequeñas con un solo proposito, validaciones claras antes de operar
 const { Pasajero } = require("../models/index");
 
 // ─── Obtener todos los pasajeros ──────────────────────────────
