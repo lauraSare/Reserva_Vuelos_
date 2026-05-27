@@ -1,3 +1,8 @@
+// Principio SOLID - Single Responsibility: cada middleware tiene una sola responsabilidad
+// Principio SOLID - Open/Closed: nuevas rutas se agregan sin modificar las existentes
+// Patron de diseño - Facade: app.js centraliza y simplifica la configuracion del servidor
+// Clean Code: configuracion modular, cada seccion claramente separada y comentada
+
 // Punto de entrada del servidor Express
 // Aquí se configuran todos los middlewares de seguridad y las rutas
 const express = require("express");
