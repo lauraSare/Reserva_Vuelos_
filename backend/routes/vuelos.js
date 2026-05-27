@@ -1,5 +1,10 @@
+// Principio SOLID - Single Responsibility: este archivo solo define rutas de vuelos
+// Principio SOLID - Open/Closed: nuevas rutas se agregan sin modificar las existentes
+// Patron de diseño - Chain of Responsibility: verificarSesion protege cada ruta antes del controlador
+// Clean Code: rutas claras y descriptivas con metodos HTTP correctos por operacion
 // Rutas de Vuelos — ABCC completo
 // Seguridad: verificarSesion protege todas las rutas
+
 const express = require("express");
 const router = express.Router();
 const {
