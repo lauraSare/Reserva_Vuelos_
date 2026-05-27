@@ -1,6 +1,9 @@
 // Controlador del Dashboard — provee estadísticas generales
 // Principio SOLID: Single Responsibility — solo maneja datos del dashboard
 // Patrón Facade: DashboardFacade simplifica el acceso a múltiples modelos
+// Principio SOLID - Open/Closed: nuevas estadisticas se agregan sin modificar las existentes
+// Principio SOLID - Dependency Inversion: depende de modelos abstractos no de consultas directas
+// Clean Code: variables con nombres descriptivos, logica clara y separada por entidad
 const { Vuelo, Pasajero, Reserva, Tripulacion } = require("../models/index");
 
 // ─── Obtener estadísticas generales ──────────────────────────
