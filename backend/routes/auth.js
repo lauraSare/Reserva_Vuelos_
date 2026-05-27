@@ -1,3 +1,8 @@
+// Principio SOLID - Single Responsibility: este archivo solo define rutas de autenticacion
+// Principio SOLID - Open/Closed: nuevas rutas se agregan sin modificar las existentes
+// Patron de diseño - Chain of Responsibility: middlewares encadenados antes de llegar al controlador
+// Clean Code: rutas claras y descriptivas, middlewares aplicados por ruta segun necesidad
+
 const express = require("express");
 const router = express.Router();
 const {
