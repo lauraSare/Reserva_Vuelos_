@@ -1,0 +1,92 @@
+// Punto de entrada del servidor Express
+// Aquí se configuran todos los middlewares de seguridad y las rutas
+const express = require("express");
+const session = require("express-session");
+const helmet = require("helmet");
+const cors = require("cors");
+const rateLimit = require("express-rate-limit");
+require("dotenv").config();
+
+// Importar rutas
+const authRoutes = require("./routes/auth");
+const dashboardRoutes = require("./routes/dashboard");
+const pasajerosRoutes = require("./routes/pasajeros");
+const reservasRoutes = require("./routes/reservas");
+const tripulacionRoutes = require("./routes/tripulacion");
+const vuelosRoutes = require("./routes/vuelos");
+const rutasRoutes = require("./routes/rutas");
+const avionesRoutes = require("./routes/aviones");
+
+// Importar conexión a BD
+const sequelize = require("./config/database");
+require("./models/index");
+
+const app = express();
+
+// ─── Seguridad: Helmet protege cabeceras HTTP ────────────────
+app.use(helmet());
+
+// ─── Seguridad: CORS — solo permite peticiones del frontend ──
+app.use(
+  cors({
+    origin: ["http://localhost:5173", "http://localhost:5174"],
+    credentials: true,
+  }),
+);
+
+// ─── Parseo de JSON y formularios ───────────────────────────
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+// ─── Seguridad: Rate Limiting ────────────────────────────────
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 100,
+  message: "Demasiadas peticiones, intenta más tarde.",
+});
+app.use(limiter);
+
+// ─── Seguridad: Sesiones ─────────────────────────────────────
+app.use(
+  session({
+    secret: process.env.SESSION_SECRET,
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+      secure: false,
+      httpOnly: true,
+      maxAge: 5 * 60 * 1000,
+      rolling: true,
+    },
+  }),
+);
+
+// ─── Rutas de la API ─────────────────────────────────────────
+app.use("/api/auth", authRoutes);
+app.use("/api/dashboard", dashboardRoutes);
+app.use("/api/pasajeros", pasajerosRoutes);
+app.use("/api/reservas", reservasRoutes);
+app.use("/api/tripulacion", tripulacionRoutes);
+app.use("/api/vuelos", vuelosRoutes);
+app.use("/api/rutas", rutasRoutes);
+app.use("/api/aviones", avionesRoutes);
+
+// ─── Ruta no encontrada (404) ────────────────────────────────
+app.use((req, res) => {
+  res.status(404).json({ message: "Ruta no encontrada" });
+});
+
+// ─── Conexión a BD e inicio del servidor ─────────────────────
+const PORT = process.env.PORT || 3000;
+
+sequelize
+  .authenticate()
+  .then(() => {
+    console.log("Conexión a la BD establecida correctamente");
+    app.listen(PORT, () => {
+      console.log(`Servidor corriendo en http://localhost:${PORT}`);
+    });
+  })
+  .catch((err) => {
+    console.error("Error al conectar con la BD:", err);
+  });
