@@ -1,0 +1,117 @@
+// Controlador de Tripulación — maneja el ABCC completo
+// Principio SOLID: Single Responsibility — solo maneja lógica de tripulación
+const { Tripulacion, Vuelo, VueloTripulacion } = require("../models/index");
+
+// ─── Obtener toda la tripulación ──────────────────────────────
+const obtenerTripulacion = async (req, res) => {
+  try {
+    const tripulacion = await Tripulacion.findAll();
+    res.json(tripulacion);
+  } catch (error) {
+    console.error("Error al obtener tripulación:", error);
+    res.status(500).json({ message: "Error interno del servidor." });
+  }
+};
+
+// ─── Obtener un miembro por ID ────────────────────────────────
+const obtenerTripulacionPorId = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const miembro = await Tripulacion.findByPk(id, {
+      include: [{ model: Vuelo, as: "Vuelos" }],
+    });
+    if (!miembro) {
+      return res
+        .status(404)
+        .json({ message: "Miembro de tripulación no encontrado." });
+    }
+    res.json(miembro);
+  } catch (error) {
+    console.error("Error al obtener miembro:", error);
+    res.status(500).json({ message: "Error interno del servidor." });
+  }
+};
+
+// ─── Crear un miembro de tripulación ─────────────────────────
+const crearTripulacion = async (req, res) => {
+  try {
+    const { nombre, primer_apellido, segundo_apellido, nacionalidad, rol } =
+      req.body;
+
+    const nuevoMiembro = await Tripulacion.create({
+      nombre,
+      primer_apellido,
+      segundo_apellido,
+      nacionalidad,
+      rol,
+    });
+
+    res
+      .status(201)
+      .json({
+        message: "Miembro de tripulación creado correctamente.",
+        tripulacion: nuevoMiembro,
+      });
+  } catch (error) {
+    console.error("Error al crear tripulación:", error);
+    res.status(500).json({ message: "Error interno del servidor." });
+  }
+};
+
+// ─── Actualizar un miembro de tripulación ────────────────────
+const actualizarTripulacion = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { nombre, primer_apellido, segundo_apellido, nacionalidad, rol } =
+      req.body;
+
+    const miembro = await Tripulacion.findByPk(id);
+    if (!miembro) {
+      return res
+        .status(404)
+        .json({ message: "Miembro de tripulación no encontrado." });
+    }
+
+    await miembro.update({
+      nombre,
+      primer_apellido,
+      segundo_apellido,
+      nacionalidad,
+      rol,
+    });
+    res.json({
+      message: "Miembro de tripulación actualizado correctamente.",
+      tripulacion: miembro,
+    });
+  } catch (error) {
+    console.error("Error al actualizar tripulación:", error);
+    res.status(500).json({ message: "Error interno del servidor." });
+  }
+};
+
+// ─── Eliminar un miembro de tripulación ──────────────────────
+const eliminarTripulacion = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const miembro = await Tripulacion.findByPk(id);
+    if (!miembro) {
+      return res
+        .status(404)
+        .json({ message: "Miembro de tripulación no encontrado." });
+    }
+
+    await miembro.destroy();
+    res.json({ message: "Miembro de tripulación eliminado correctamente." });
+  } catch (error) {
+    console.error("Error al eliminar tripulación:", error);
+    res.status(500).json({ message: "Error interno del servidor." });
+  }
+};
+
+module.exports = {
+  obtenerTripulacion,
+  obtenerTripulacionPorId,
+  crearTripulacion,
+  actualizarTripulacion,
+  eliminarTripulacion,
+};
