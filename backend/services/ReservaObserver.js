@@ -1,3 +1,6 @@
+// Principio SOLID - Open/Closed: nuevos observadores se agregan sin modificar el subject
+// Principio SOLID - Single Responsibility: cada observador tiene una sola tarea
+// Clean Code: clases con nombres descriptivos, metodos claros y bien definidos
 // Patrón de Diseño: OBSERVER (Comportamiento)
 // Notifica automáticamente cuando el estado de una reserva cambia
 // Los observadores reaccionan al cambio sin que la reserva los conozca directamente

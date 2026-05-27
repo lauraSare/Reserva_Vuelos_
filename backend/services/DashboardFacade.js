@@ -1,3 +1,6 @@
+// Principio SOLID - Single Responsibility: solo centraliza las consultas del dashboard
+// Principio SOLID - Dependency Inversion: depende de modelos abstractos no de consultas directas
+// Clean Code: metodo estatico claro, Promise.all para consultas paralelas eficientes
 // Patrón de Diseño: FACADE (Estructural)
 // Simplifica el acceso a múltiples modelos desde el dashboard
 // En lugar de que el controlador llame a cada modelo por separado,
