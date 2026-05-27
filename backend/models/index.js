@@ -1,3 +1,9 @@
+// Principio SOLID - Single Responsibility: este archivo solo define asociaciones entre modelos
+// Principio SOLID - Open/Closed: nuevos modelos se agregan sin modificar los existentes
+// Patron de diseño - Repository: centraliza el acceso a todos los modelos en un solo lugar
+// Clean Code: asociaciones claramente agrupadas y comentadas por entidad
+
+
 const sequelize = require("../config/database");
 
 // Importar modelos
