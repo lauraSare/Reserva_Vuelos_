@@ -1,4 +1,7 @@
 // Middleware de seguridad — protege contra ataques comunes
+// Principio SOLID - Single Responsibility: cada funcion maneja un aspecto de seguridad
+// Patron de diseño - Chain of Responsibility: middlewares encadenados para proteger rutas
+// Clean Code: funciones separadas por responsabilidad, nombres descriptivos
 const expresRateLimit = require("express-rate-limit");
 const axios = require("axios");
 
