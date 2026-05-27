@@ -1,6 +1,6 @@
-// Controlador de autenticación — maneja login, registro y logout
-// Principio SOLID: Single Responsibility — solo maneja lógica de autenticación
-// Patrón: Facade — simplifica la creación de usuario+pasajero en un solo paso
+// Principio SOLID - Open/Closed: nuevas funciones de auth se agregan sin modificar las existentes
+// Principio SOLID - Dependency Inversion: depende de abstracciones (modelos) no de implementaciones
+// Clean Code: funciones pequeñas con un solo proposito, nombres descriptivos
 const bcrypt = require("bcryptjs");
 const { Usuario, Pasajero } = require("../models/index");
 
