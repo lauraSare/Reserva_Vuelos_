@@ -1,5 +1,9 @@
 // Controlador de Reservas — maneja el ABCC completo
 // Principio SOLID: Single Responsibility — solo maneja lógica de reservas
+// Principio SOLID - Open/Closed: nuevas operaciones se agregan sin modificar las existentes
+// Principio SOLID - Dependency Inversion: depende de modelos Sequelize no de consultas directas
+// Patron de diseño - Strategy: calculo de descuentos intercambiable segun tipo de ruta y clase
+// Clean Code: funciones con un solo proposito, manejo de errores consistente en todas las operaciones
 const {
   Reserva,
   Pasajero,
