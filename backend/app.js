@@ -21,6 +21,7 @@ const tripulacionRoutes = require("./routes/tripulacion");
 const vuelosRoutes = require("./routes/vuelos");
 const rutasRoutes = require("./routes/rutas");
 const avionesRoutes = require("./routes/aviones");
+const aeropuertosRoutes = require("./routes/aeropuertos");
 
 // Importar conexión a BD
 const sequelize = require("./config/database");
@@ -75,6 +76,7 @@ app.use("/api/tripulacion", tripulacionRoutes);
 app.use("/api/vuelos", vuelosRoutes);
 app.use("/api/rutas", rutasRoutes);
 app.use("/api/aviones", avionesRoutes);
+app.use("/api/aeropuertos", aeropuertosRoutes);
 
 // ─── Ruta no encontrada (404) ────────────────────────────────
 app.use((req, res) => {
