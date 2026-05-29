@@ -10,6 +10,8 @@ import Pasajeros from "../views/Pasajeros.vue";
 import Reservas from "../views/Reservas.vue";
 import Tripulacion from "../views/Tripulacion.vue";
 import NotFound from "../views/NotFound.vue";
+import Aviones from "../views/Aviones.vue";
+import Rutas from "../views/Rutas.vue";
 
 const routes = [
   // ─── Rutas públicas ───────────────────────────────────────
@@ -58,6 +60,18 @@ const routes = [
     path: "/tripulacion",
     name: "Tripulacion",
     component: Tripulacion,
+    meta: { requiresAuth: true },
+  },
+  {
+    path: "/aviones",
+    name: "Aviones",
+    component: Aviones,
+    meta: { requiresAuth: true },
+  },
+  {
+    path: "/rutas",
+    name: "Rutas",
+    component: Rutas,
     meta: { requiresAuth: true },
   },
 
