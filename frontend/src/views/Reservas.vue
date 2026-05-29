@@ -66,6 +66,15 @@
                     </svg>
                     <span v-if="!sidebarCollapsed">Tripulación</span>
                 </router-link>
+                <router-link to="/aviones" class="nav-item">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="20"
+                        height="20">
+                        <path d="M22 16.5H2l4-9h12l4 9z" />
+                        <path d="M6 16.5l1.5 3h9l1.5-3" />
+                        <path d="M12 7.5V4m0 0l-2 2m2-2l2 2" />
+                    </svg>
+                    <span v-if="!sidebarCollapsed">Aviones</span>
+                </router-link>
             </nav>
             <div class="sidebar-footer" v-if="!sidebarCollapsed">
                 <div class="user-info">
@@ -550,51 +559,126 @@ const guardarReserva = async () => {
     const precioBase = PRECIOS[tipoRuta][claseSeleccionada]
     const { precioFinal, descuentos } = calcularDescuentos(precioBase, vuelo, claseSeleccionada)
 
-    // SweetAlert 2 — Confirmar precio y método de pago
+    // SweetAlert 2 — Mapa de asientos
+    const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000'
+    let asientosVuelo = []
+    try {
+        const resAsientos = await fetch(`${API_URL}/api/vuelos/${form.value.id_vuelo}/asientos`, { credentials: 'include' })
+        asientosVuelo = await resAsientos.json()
+    } catch { asientosVuelo = [] }
+
+    const asientosFiltrados = asientosVuelo.filter(a => {
+        if (claseSeleccionada === 'turista') return a.clase === 'turista'
+        if (claseSeleccionada === 'ejecutiva') return a.clase === 'ejecutiva'
+        if (claseSeleccionada === 'primera') return a.clase === 'primera_clase'
+        return true
+    })
+
+    const filas = {}
+    asientosFiltrados.forEach(a => {
+        const fila = a.numero_asiento.replace(/[A-F]/g, '')
+        if (!filas[fila]) filas[fila] = []
+        filas[fila].push(a)
+    })
+
+    const htmlMapa = `
+        <p style="color:#b89a8a;margin-bottom:1rem;">Selecciona tu asiento de <strong style="color:#c9a84c;">${claseSeleccionada}</strong></p>
+        <div style="display:flex;gap:0.5rem;justify-content:center;margin-bottom:1rem;flex-wrap:wrap;">
+            <span style="display:flex;align-items:center;gap:4px;font-size:0.75rem;color:#7fd4a0;">
+                <span style="width:16px;height:16px;background:rgba(46,155,90,0.3);border:1px solid #7fd4a0;border-radius:4px;display:inline-block;"></span> Disponible
+            </span>
+            <span style="display:flex;align-items:center;gap:4px;font-size:0.75rem;color:#f08080;">
+                <span style="width:16px;height:16px;background:rgba(155,28,46,0.3);border:1px solid #f08080;border-radius:4px;display:inline-block;"></span> Ocupado
+            </span>
+            <span style="display:flex;align-items:center;gap:4px;font-size:0.75rem;color:#f0c96b;">
+                <span style="width:16px;height:16px;background:rgba(201,168,76,0.2);border:1px solid #f0c96b;border-radius:4px;display:inline-block;"></span> Bloqueado
+            </span>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:0.4rem;max-height:300px;overflow-y:auto;">
+            ${Object.entries(filas).map(([fila, asientos]) => `
+                <div style="display:flex;align-items:center;gap:0.4rem;justify-content:center;">
+                    <span style="color:#6b5a5a;font-size:0.75rem;width:20px;text-align:right;">${fila}</span>
+                    ${asientos.map(a => {
+                        const color = a.estado === 'disponible' ? '#7fd4a0' : a.estado === 'bloqueado' ? '#f0c96b' : '#f08080'
+                        const bg = a.estado === 'disponible' ? 'rgba(46,155,90,0.15)' : a.estado === 'bloqueado' ? 'rgba(201,168,76,0.2)' : 'rgba(155,28,46,0.2)'
+                        return `<button class="swal-asiento-btn"
+                            data-id="${a.id_asiento}" data-num="${a.numero_asiento}" data-estado="${a.estado}"
+                            ${a.estado !== 'disponible' ? 'disabled' : ''}
+                            style="width:36px;height:36px;border-radius:6px;border:1px solid ${color};
+                            cursor:${a.estado === 'disponible' ? 'pointer' : 'not-allowed'};
+                            font-size:0.7rem;font-weight:700;font-family:inherit;
+                            background:${bg};color:${color};"
+                            title="${a.numero_asiento} — ${a.estado}">
+                            ${a.numero_asiento.replace(fila, '')}
+                        </button>`
+                    }).join('')}
+                </div>
+            `).join('')}
+        </div>
+        <p id="asiento-seleccionado-label" style="margin-top:1rem;color:#c9a84c;font-weight:700;min-height:1.5rem;"></p>
+    `
+
+    const { isConfirmed: mapaConfirmado } = await window.Swal.fire({
+        title: 'Selecciona tu asiento',
+        html: htmlMapa,
+        background: '#1a0c10', color: '#f0e8e0',
+        showConfirmButton: true,
+        confirmButtonText: 'Confirmar asiento',
+        confirmButtonColor: '#c9a84c',
+        showCancelButton: true,
+        cancelButtonText: 'Cancelar',
+        cancelButtonColor: '#4a3020',
+        didOpen: () => {
+            window.swalAsientoSeleccionado = null
+            document.querySelectorAll('.swal-asiento-btn:not([disabled])').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    document.querySelectorAll('.swal-asiento-btn').forEach(b => {
+                        if (!b.disabled) {
+                            b.style.background = 'rgba(46,155,90,0.15)'
+                            b.style.borderColor = '#7fd4a0'
+                            b.style.color = '#7fd4a0'
+                        }
+                    })
+                    btn.style.background = 'rgba(201,168,76,0.3)'
+                    btn.style.borderColor = '#c9a84c'
+                    btn.style.color = '#c9a84c'
+                    window.swalAsientoSeleccionado = { id: btn.dataset.id, num: btn.dataset.num }
+                    const label = document.getElementById('asiento-seleccionado-label')
+                    if (label) label.textContent = `Asiento seleccionado: ${ btn.dataset.num } `
+                })
+            })
+        }
+    })
+
+    if (!mapaConfirmado || !window.swalAsientoSeleccionado) return
+    const asientoSeleccionado = window.swalAsientoSeleccionado
+
+    // SweetAlert 3 — Método de pago
     const htmlDescuentos = descuentos.length > 0
-        ? `<p style="color:#7fd4a0; margin:0.5rem 0;">Descuentos: ${descuentos.join(', ')}</p>`
+        ? `< p style = "color:#7fd4a0;margin:0.5rem 0;" > Descuentos: ${ descuentos.join(', ') }</p > `
         : ''
 
     const { value: metodoPago } = await window.Swal.fire({
         title: 'Método de pago',
         html: `
-            <p style="color:#b89a8a;">Clase: <strong style="color:#c9a84c;">${claseSeleccionada.charAt(0).toUpperCase() + claseSeleccionada.slice(1)}</strong></p>
-            <p style="color:#b89a8a;">Precio base: <strong>$${precioBase.toLocaleString()} MXN</strong></p>
-            ${htmlDescuentos}
-            <p style="font-size:1.3rem; color:#c9a84c; font-weight:800; margin:1rem 0;">Total: $${precioFinal.toLocaleString()} MXN</p>
-            <div style="display:flex; gap:1rem; justify-content:center; margin-top:1rem;">
-                <button id="btn-transferencia" style="
-                    padding:0.75rem 1.5rem; background:rgba(201,168,76,0.15);
-                    border:1px solid rgba(201,168,76,0.4); border-radius:8px;
-                    color:#c9a84c; cursor:pointer; font-family:inherit; font-weight:700;
-                    display:flex; align-items:center; gap:0.5rem;">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="#c9a84c" stroke-width="1.5" width="18" height="18"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
-                    Transferencia
-                </button>
-                <button id="btn-efectivo" style="
-                    padding:0.75rem 1.5rem; background:rgba(201,168,76,0.15);
-                    border:1px solid rgba(201,168,76,0.4); border-radius:8px;
-                    color:#c9a84c; cursor:pointer; font-family:inherit; font-weight:700;
-                    display:flex; align-items:center; gap:0.5rem;">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="#c9a84c" stroke-width="1.5" width="18" height="18"><rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="3"/><path d="M6 12h.01M18 12h.01"/></svg>
-                    Efectivo
-                </button>
+    < p style = "color:#b89a8a;" > Clase: <strong style="color:#c9a84c;">${claseSeleccionada}</strong> — Asiento: <strong style="color:#c9a84c;">${asientoSeleccionado.num}</strong></p >
+        <p style="color:#b89a8a;">Precio base: <strong>$${precioBase.toLocaleString()} MXN</strong></p>
+            ${ htmlDescuentos }
+            <p style="font-size:1.3rem;color:#c9a84c;font-weight:800;margin:1rem 0;">Total: $${precioFinal.toLocaleString()} MXN</p>
+            <div style="display:flex;gap:1rem;justify-content:center;margin-top:1rem;">
+                <button id="btn-transferencia" style="padding:0.75rem 1.5rem;background:rgba(201,168,76,0.15);border:1px solid rgba(201,168,76,0.4);border-radius:8px;color:#c9a84c;cursor:pointer;font-family:inherit;font-weight:700;">Transferencia</button>
+                <button id="btn-efectivo" style="padding:0.75rem 1.5rem;background:rgba(201,168,76,0.15);border:1px solid rgba(201,168,76,0.4);border-radius:8px;color:#c9a84c;cursor:pointer;font-family:inherit;font-weight:700;">Efectivo</button>
             </div>
-        `,
-        background: '#1a0c10',
-        color: '#f0e8e0',
-        showConfirmButton: false,
-        showCancelButton: true,
-        cancelButtonText: 'Cancelar',
-        cancelButtonColor: '#4a3020',
+`,
+        background: '#1a0c10', color: '#f0e8e0',
+        showConfirmButton: false, showCancelButton: true,
+        cancelButtonText: 'Cancelar', cancelButtonColor: '#4a3020',
         didOpen: () => {
             document.getElementById('btn-transferencia').addEventListener('click', () => {
-                window.swalMetodoPago = 'transferencia'
-                window.Swal.clickConfirm()
+                window.swalMetodoPago = 'transferencia'; window.Swal.clickConfirm()
             })
             document.getElementById('btn-efectivo').addEventListener('click', () => {
-                window.swalMetodoPago = 'efectivo'
-                window.Swal.clickConfirm()
+                window.swalMetodoPago = 'efectivo'; window.Swal.clickConfirm()
             })
         }
     })
@@ -609,12 +693,12 @@ const guardarReserva = async () => {
             id_pasajero: form.value.id_pasajero,
             clase: claseSeleccionada,
             metodo_pago: metodoSeleccionado,
-            monto: precioFinal
+            monto: precioFinal,
+            id_asiento: asientoSeleccionado.id
         })
         window.Swal.fire({
-            icon: 'success',
-            title: '¡Reserva confirmada!',
-            html: `<p>Clase: <strong>${claseSeleccionada}</strong></p><p>Total pagado: <strong>$${precioFinal.toLocaleString()} MXN</strong></p><p>Método: <strong>${metodoSeleccionado}</strong></p>`,
+            icon: 'success', title: '¡Reserva confirmada!',
+            html: `< p > Asiento: <strong>${asientoSeleccionado.num}</strong></p ><p>Clase: <strong>${claseSeleccionada}</strong></p><p>Total: <strong>$${precioFinal.toLocaleString()} MXN</strong></p><p>Método: <strong>${metodoSeleccionado}</strong></p>`,
             background: '#1a0c10', color: '#f0e8e0', confirmButtonColor: '#c9a84c'
         })
         cerrarModal()
@@ -625,6 +709,7 @@ const guardarReserva = async () => {
         loading.value = false
         window.swalClaseSeleccionada = null
         window.swalMetodoPago = null
+        window.swalAsientoSeleccionado = null
     }
 }
 
@@ -1359,24 +1444,30 @@ onMounted(async () => {
         flex-direction: column;
         align-items: flex-start;
     }
+
     .table-card {
         padding: 0.5rem;
     }
+
     :deep(.quetzal-table) {
         font-size: 0.75rem !important;
     }
+
     :deep(.quetzal-table thead th) {
         padding: 0.5rem 0.4rem !important;
         font-size: 0.65rem !important;
     }
+
     :deep(.quetzal-table tbody td) {
         padding: 0.5rem 0.4rem !important;
         font-size: 0.75rem !important;
     }
+
     :deep(.action-btns) {
         flex-direction: column;
         gap: 0.25rem;
     }
+
     :deep(.btn-edit),
     :deep(.btn-delete) {
         width: 26px;
