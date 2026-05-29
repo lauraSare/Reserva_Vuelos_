@@ -655,19 +655,20 @@ const guardarReserva = async () => {
 
     // SweetAlert 3 — Método de pago
     const htmlDescuentos = descuentos.length > 0
-        ? `< p style = "color:#7fd4a0;margin:0.5rem 0;" > Descuentos: ${ descuentos.join(', ') }</p > `
+        ? `<p style="color:#7fd4a0;margin:0.5rem 0;">Descuentos: ${descuentos.join(', ')}</p>`
         : ''
 
     const { value: metodoPago } = await window.Swal.fire({
         title: 'Método de pago',
         html: `
-    < p style = "color:#b89a8a;" > Clase: <strong style="color:#c9a84c;">${claseSeleccionada}</strong> — Asiento: <strong style="color:#c9a84c;">${asientoSeleccionado.num}</strong></p >
+    <p style="color:#b89a8a;">Clase: <strong style="color:#c9a84c;">${claseSeleccionada}</strong> — Asiento: <strong style="color:#c9a84c;">${asientoSeleccionado.num}</strong></p>
         <p style="color:#b89a8a;">Precio base: <strong>$${precioBase.toLocaleString()} MXN</strong></p>
             ${ htmlDescuentos }
             <p style="font-size:1.3rem;color:#c9a84c;font-weight:800;margin:1rem 0;">Total: $${precioFinal.toLocaleString()} MXN</p>
             <div style="display:flex;gap:1rem;justify-content:center;margin-top:1rem;">
                 <button id="btn-transferencia" style="padding:0.75rem 1.5rem;background:rgba(201,168,76,0.15);border:1px solid rgba(201,168,76,0.4);border-radius:8px;color:#c9a84c;cursor:pointer;font-family:inherit;font-weight:700;">Transferencia</button>
                 <button id="btn-efectivo" style="padding:0.75rem 1.5rem;background:rgba(201,168,76,0.15);border:1px solid rgba(201,168,76,0.4);border-radius:8px;color:#c9a84c;cursor:pointer;font-family:inherit;font-weight:700;">Efectivo</button>
+                <button id="btn-puntos" style="padding:0.75rem 1.5rem;background:rgba(201,168,76,0.15);border:1px solid rgba(201,168,76,0.4);border-radius:8px;color:#c9a84c;cursor:pointer;font-family:inherit;font-weight:700;">Puntos</button>
             </div>
 `,
         background: '#1a0c10', color: '#f0e8e0',
@@ -679,6 +680,9 @@ const guardarReserva = async () => {
             })
             document.getElementById('btn-efectivo').addEventListener('click', () => {
                 window.swalMetodoPago = 'efectivo'; window.Swal.clickConfirm()
+            })
+            document.getElementById('btn-puntos').addEventListener('click', () => {
+                window.swalMetodoPago = 'puntos'; window.Swal.clickConfirm()
             })
         }
     })
@@ -698,7 +702,7 @@ const guardarReserva = async () => {
         })
         window.Swal.fire({
             icon: 'success', title: '¡Reserva confirmada!',
-            html: `< p > Asiento: <strong>${asientoSeleccionado.num}</strong></p ><p>Clase: <strong>${claseSeleccionada}</strong></p><p>Total: <strong>$${precioFinal.toLocaleString()} MXN</strong></p><p>Método: <strong>${metodoSeleccionado}</strong></p>`,
+            html: `<p>Asiento: <strong>${asientoSeleccionado.num}</strong></p><p>Clase: <strong>${claseSeleccionada}</strong></p><p>Total: <strong>$${precioFinal.toLocaleString()} MXN</strong></p><p>Método: <strong>${metodoSeleccionado}</strong></p>`,
             background: '#1a0c10', color: '#f0e8e0', confirmButtonColor: '#c9a84c'
         })
         cerrarModal()
