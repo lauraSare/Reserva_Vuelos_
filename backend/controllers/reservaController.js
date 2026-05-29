@@ -69,7 +69,7 @@ const obtenerReservaPorId = async (req, res) => {
 // ─── Crear una reserva con pago ───────────────────────────────
 const crearReserva = async (req, res) => {
   try {
-    const { id_vuelo, id_pasajero, clase, metodo_pago, monto } = req.body;
+    const { id_vuelo, id_pasajero, clase, metodo_pago, monto, id_asiento } = req.body;
 
     // Verificar que el pasajero no tenga reserva activa en este vuelo
     const reservaExistente = await Reserva.findOne({
@@ -96,6 +96,17 @@ const crearReserva = async (req, res) => {
       estado: "confirmada",
       clase: clase || "turista",
     });
+
+    // Guardar asiento seleccionado en vuelo_asientos
+    if (id_asiento) {
+      const { sequelize } = require("../models/index");
+      await sequelize.query(
+        `INSERT INTO vuelo_asientos (id_vuelo, id_asiento, estado)
+         VALUES (:id_vuelo, :id_asiento, 'ocupado')
+         ON DUPLICATE KEY UPDATE estado = 'ocupado'`,
+        { replacements: { id_vuelo, id_asiento } }
+      );
+    }
 
     // Crear el pago
     await Pago.create({
