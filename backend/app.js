@@ -28,6 +28,8 @@ const sequelize = require("./config/database");
 require("./models/index");
 
 const app = express();
+app.set('trust proxy', 1);
+
 
 // ─── Seguridad: Helmet protege cabeceras HTTP ────────────────
 app.use(helmet());
