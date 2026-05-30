@@ -35,7 +35,7 @@ app.use(helmet());
 // ─── Seguridad: CORS — solo permite peticiones del frontend ──
 app.use(
   cors({
-    origin: ["http://localhost:5173", "http://localhost:5174"],
+    origin: ["http://localhost:5173", "http://localhost:5174", "https://sanchezreyeslaura-reserva-vuelos-frontend.onrender.com"],
     credentials: true,
   }),
 );
