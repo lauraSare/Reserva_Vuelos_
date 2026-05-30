@@ -66,6 +66,34 @@
                     </svg>
                     <span v-if="!sidebarCollapsed">Tripulación</span>
                 </router-link>
+                <router-link to="/aviones" class="nav-item">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="20"
+                        height="20">
+                        <path d="M22 16.5H2l4-9h12l4 9z" />
+                        <path d="M6 16.5l1.5 3h9l1.5-3" />
+                        <path d="M12 7.5V4m0 0l-2 2m2-2l2 2" />
+                    </svg>
+                    <span v-if="!sidebarCollapsed">Aviones</span>
+                </router-link>
+                <router-link to="/grupos" class="nav-item">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="20" height="20">
+                        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                        <circle cx="9" cy="7" r="4"/>
+                        <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+                        <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                        <line x1="19" y1="8" x2="19" y2="14"/>
+                        <line x1="22" y1="11" x2="16" y2="11"/>
+                    </svg>
+                    <span v-if="!sidebarCollapsed">Grupos</span>
+                </router-link>
+                <router-link to="/rutas" class="nav-item">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="20"
+                        height="20">
+                        <circle cx="6" cy="19" r="3" /><circle cx="18" cy="5" r="3" />
+                        <path d="M6 16V7a6 6 0 0 1 6-6" /><path d="M18 8v9a6 6 0 0 1-6 6" />
+                    </svg>
+                    <span v-if="!sidebarCollapsed">Rutas</span>
+                </router-link>
             </nav>
             <div class="sidebar-footer" v-if="!sidebarCollapsed">
                 <div class="user-info">
@@ -473,6 +501,9 @@ const inicializarTabla = () => {
                     data: 'id_vuelo', orderable: false,
                     render: id => `
                         <div class="action-btns">
+                            <button class="btn-seats" data-id="${id}" title="Gestionar asientos" style="width:32px;height:32px;display:flex;align-items:center;justify-content:center;border-radius:8px;border:none;cursor:pointer;background:rgba(76,148,201,0.12);color:#7ab8f5;transition:all 0.2s;">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="15" height="15"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+                            </button>
                             <button class="btn-edit" data-id="${id}" title="Editar">
                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="15" height="15">
                                     <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
@@ -494,6 +525,9 @@ const inicializarTabla = () => {
             pageLength: 10,
             dom: '<"dt-top"lf>rt<"dt-bottom"ip>',
             drawCallback: () => {
+                document.querySelectorAll('.btn-seats').forEach(btn => {
+                    btn.onclick = () => gestionarAsientos(Number(btn.dataset.id))
+                })
                 document.querySelectorAll('.btn-edit').forEach(btn => {
                     btn.onclick = () => abrirModalEditar(Number(btn.dataset.id))
                 })
@@ -641,6 +675,93 @@ const guardarVuelo = async () => {
     }
 }
 
+const gestionarAsientos = async (idVuelo) => {
+    let asientosVuelo = []
+    try {
+        const res = await axios.get(`${API_URL}/api/vuelos/${idVuelo}/asientos`, { withCredentials: true })
+        asientosVuelo = res.data
+    } catch { asientosVuelo = [] }
+
+    const vuelo = vuelos.value.find(v => v.id_vuelo === idVuelo)
+    const codigoVuelo = vuelo?.codigo_vuelo || `Vuelo #${idVuelo}`
+
+    const renderMapa = (asientos) => {
+        const clases = ['primera_clase', 'ejecutiva', 'turista']
+        const etiquetas = { primera_clase: 'Primera', ejecutiva: 'Ejecutiva', turista: 'Turista' }
+        return clases.map(clase => {
+            const asientosClase = asientos.filter(a => a.clase === clase)
+            if (!asientosClase.length) return ''
+            const filasClase = {}
+            asientosClase.forEach(a => {
+                const fila = a.numero_asiento.replace(/[A-F]/g, '')
+                if (!filasClase[fila]) filasClase[fila] = []
+                filasClase[fila].push(a)
+            })
+            return `
+                <div style="margin-bottom:1rem;">
+                    <p style="color:#c9a84c;font-size:0.75rem;font-weight:700;letter-spacing:1px;text-transform:uppercase;margin-bottom:0.5rem;">${etiquetas[clase]}</p>
+                    ${Object.entries(filasClase).map(([fila, asientosF]) => `
+                        <div style="display:flex;align-items:center;gap:0.4rem;justify-content:center;margin-bottom:0.3rem;">
+                            <span style="color:#6b5a5a;font-size:0.75rem;width:20px;text-align:right;">${fila}</span>
+                            ${asientosF.map(a => {
+                                const color = a.estado === 'disponible' ? '#7fd4a0' : a.estado === 'ocupado' ? '#f08080' : '#f0c96b'
+                                const bg = a.estado === 'disponible' ? 'rgba(46,155,90,0.15)' : a.estado === 'ocupado' ? 'rgba(155,28,46,0.2)' : 'rgba(201,168,76,0.2)'
+                                const clickable = a.estado !== 'ocupado'
+                                return `<button class="swal-seat-manage"
+                                    data-id="${a.id_asiento}" data-num="${a.numero_asiento}" data-estado="${a.estado}"
+                                    ${!clickable ? 'disabled' : ''}
+                                    style="width:36px;height:36px;border-radius:6px;border:1px solid ${color};
+                                    cursor:${clickable ? 'pointer' : 'not-allowed'};font-size:0.7rem;font-weight:700;font-family:inherit;
+                                    background:${bg};color:${color};"
+                                    title="${a.numero_asiento} — ${a.estado}">
+                                    ${a.numero_asiento.replace(fila, '')}
+                                </button>`
+                            }).join('')}
+                        </div>
+                    `).join('')}
+                </div>
+            `
+        }).join('')
+    }
+
+    await window.Swal.fire({
+        title: `Asientos — ${codigoVuelo}`,
+        html: `
+            <div style="display:flex;gap:0.5rem;justify-content:center;margin-bottom:1rem;flex-wrap:wrap;">
+                <span style="display:flex;align-items:center;gap:4px;font-size:0.75rem;color:#7fd4a0;"><span style="width:12px;height:12px;background:rgba(46,155,90,0.3);border:1px solid #7fd4a0;border-radius:3px;display:inline-block;"></span>Disponible</span>
+                <span style="display:flex;align-items:center;gap:4px;font-size:0.75rem;color:#f08080;"><span style="width:12px;height:12px;background:rgba(155,28,46,0.3);border:1px solid #f08080;border-radius:3px;display:inline-block;"></span>Ocupado</span>
+                <span style="display:flex;align-items:center;gap:4px;font-size:0.75rem;color:#f0c96b;"><span style="width:12px;height:12px;background:rgba(201,168,76,0.2);border:1px solid #f0c96b;border-radius:3px;display:inline-block;"></span>Bloqueado</span>
+            </div>
+            <p style="color:#b89a8a;font-size:0.8rem;margin-bottom:1rem;">Clic en disponible para bloquear, en bloqueado para desbloquear.</p>
+            <div style="max-height:350px;overflow-y:auto;">${renderMapa(asientosVuelo)}</div>
+        `,
+        background: '#1a0c10', color: '#f0e8e0',
+        showConfirmButton: true,
+        confirmButtonText: 'Cerrar',
+        confirmButtonColor: '#4a3020',
+        width: '500px',
+        didOpen: () => {
+            document.querySelectorAll('.swal-seat-manage:not([disabled])').forEach(btn => {
+                btn.addEventListener('click', async () => {
+                    const estadoActual = btn.dataset.estado
+                    const nuevoEstado = estadoActual === 'disponible' ? 'bloqueado' : 'disponible'
+                    try {
+                        await axios.post(`${API_URL}/api/vuelos/${idVuelo}/asientos/estado`, {
+                            id_asiento: btn.dataset.id, estado: nuevoEstado
+                        }, { withCredentials: true })
+                        btn.dataset.estado = nuevoEstado
+                        const color = nuevoEstado === 'disponible' ? '#7fd4a0' : '#f0c96b'
+                        const bg = nuevoEstado === 'disponible' ? 'rgba(46,155,90,0.15)' : 'rgba(201,168,76,0.2)'
+                        btn.style.borderColor = color
+                        btn.style.background = bg
+                        btn.style.color = color
+                    } catch { console.error('Error al cambiar estado') }
+                })
+            })
+        }
+    })
+}
+
 const confirmarEliminar = async (id) => {
     const result = await window.Swal.fire({
         title: '¿Eliminar vuelo?', text: 'Esta acción no se puede deshacer.',
@@ -754,6 +875,7 @@ onMounted(async () => {
     display: flex;
     flex-direction: column;
     gap: 0.4rem;
+    overflow-y: auto;
 }
 
 .nav-item {

@@ -31,4 +31,10 @@ router.get("/csrf-token", (req, res) => {
   res.json({ csrfToken: "dev-token" });
 });
 
+// GET /api/auth/ping — renueva la sesión activa
+const { verificarSesion: authMiddleware } = require("../middlewares/auth");
+router.get("/ping", authMiddleware, (req, res) => {
+    res.json({ ok: true });
+});
+
 module.exports = router;

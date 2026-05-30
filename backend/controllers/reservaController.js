@@ -14,6 +14,7 @@ const {
   Avion,
   Aeropuerto,
 } = require("../models/index");
+const { reservaObserver } = require("../services/ReservaObserver");
 
 // ─── Obtener todas las reservas ───────────────────────────────
 const obtenerReservas = async (req, res) => {
@@ -99,13 +100,19 @@ const crearReserva = async (req, res) => {
 
     // Guardar asiento seleccionado en vuelo_asientos
     if (id_asiento) {
-      const { sequelize } = require("../models/index");
+      const { sequelize, ReservaAsiento } = require("../models/index");
       await sequelize.query(
         `INSERT INTO vuelo_asientos (id_vuelo, id_asiento, estado)
          VALUES (:id_vuelo, :id_asiento, 'ocupado')
          ON DUPLICATE KEY UPDATE estado = 'ocupado'`,
         { replacements: { id_vuelo, id_asiento } }
       );
+      // Registrar asiento en reserva_asiento (relación N:M reserva-asiento)
+      await ReservaAsiento.create({
+        id_reserva: nuevaReserva.id_reserva,
+        id_asiento: id_asiento,
+        precio: monto,
+      });
     }
 
     // Crear el pago
@@ -116,6 +123,9 @@ const crearReserva = async (req, res) => {
       estado: "completado",
       id_grupo: grupo.id_grupo,
     });
+
+    // Patrón Observer — notifica a los suscriptores que se creó una reserva
+    reservaObserver.notificar("confirmada", { id_reserva: nuevaReserva.id_reserva });
 
     res
       .status(201)
@@ -138,6 +148,8 @@ const actualizarReserva = async (req, res) => {
     if (!reserva)
       return res.status(404).json({ message: "Reserva no encontrada." });
     await reserva.update({ estado });
+    // Patrón Observer — notifica a los suscriptores del cambio de estado
+    reservaObserver.notificar(estado, { id_reserva: id });
     res.json({ message: "Reserva actualizada correctamente.", reserva });
   } catch (error) {
     console.error("Error al actualizar reserva:", error);
@@ -167,7 +179,19 @@ const eliminarReserva = async (req, res) => {
     const reserva = await Reserva.findByPk(id);
     if (!reserva)
       return res.status(404).json({ message: "Reserva no encontrada." });
+    // Eliminar registros dependientes antes de eliminar la reserva
+    const { ReservaAsiento } = require("../models/index");
+    const id_grupo = reserva.id_grupo;
+    await ReservaAsiento.destroy({ where: { id_reserva: id } });
     await reserva.destroy();
+    // Si el grupo quedó sin reservas, eliminar grupo y pago
+    if (id_grupo) {
+      const reservasRestantes = await Reserva.count({ where: { id_grupo } });
+      if (reservasRestantes === 0) {
+        await Pago.destroy({ where: { id_grupo } });
+        await GrupoReserva.destroy({ where: { id_grupo } });
+      }
+    }
     res.json({ message: "Reserva eliminada correctamente." });
   } catch (error) {
     console.error("Error al eliminar reserva:", error);

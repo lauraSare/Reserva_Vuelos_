@@ -9,19 +9,19 @@ const noEstaVacio = (valor) =>
 // ─── Validar formato de correo ────────────────────────────────
 // Solo letras o números antes del @ y dominio obligatorio
 const esCorreoValido = (correo) => {
-  const regex = /^[a-zA-Z0-9]+@[a-zA-Z0-9]+\.[a-zA-Z]{2,}$/;
+  const regex = /^[^\s@]+@[^\s@]+\.[a-zA-Z]{2,}$/;
   return regex.test(correo);
 };
 
 // ─── Validar nombre (dos palabras con mayúscula inicial) ──────
-// Ej: Laura Susana — dos palabras separadas por un espacio
+// Ej: Nombre Nombre — dos palabras separadas por un espacio
 const esNombreValido = (nombre) => {
   const regex = /^[A-ZÁÉÍÓÚÑ][a-záéíóúñ]+(\s[A-ZÁÉÍÓÚÑ][a-záéíóúñ]+)?$/;
   return regex.test(nombre.trim());
 };
 
 // ─── Validar apellido (una palabra con mayúscula inicial) ─────
-// Ej: García — una sola palabra con mayúscula inicial
+// Ej: Apellido — una sola palabra con mayúscula inicial
 const esApellidoValido = (apellido) => {
   const regex = /^[A-ZÁÉÍÓÚÑ][a-záéíóúñ]+$/;
   return regex.test(apellido.trim());
@@ -62,7 +62,7 @@ const validarRegistro = (req, res, next) => {
     errores.push("El nombre es obligatorio.");
   } else if (!esNombreValido(nombre)) {
     errores.push(
-      "El nombre debe tener dos palabras con mayúscula inicial. Ej: Laura Susana",
+      "El nombre debe tener dos palabras con mayúscula inicial. Ej: Nombre Nombre",
     );
   }
 
@@ -70,13 +70,13 @@ const validarRegistro = (req, res, next) => {
     errores.push("El primer apellido es obligatorio.");
   } else if (!esApellidoValido(primer_apellido)) {
     errores.push(
-      "El primer apellido debe iniciar con mayúscula y ser una sola palabra. Ej: García",
+      "El primer apellido debe iniciar con mayúscula y ser una sola palabra. Ej: Apellido",
     );
   }
 
   if (noEstaVacio(segundo_apellido) && !esApellidoValido(segundo_apellido)) {
     errores.push(
-      "El segundo apellido debe iniciar con mayúscula y ser una sola palabra. Ej: López",
+      "El segundo apellido debe iniciar con mayúscula y ser una sola palabra. Ej: Apellido",
     );
   }
 
@@ -84,7 +84,7 @@ const validarRegistro = (req, res, next) => {
     errores.push("El correo es obligatorio.");
   } else if (!esCorreoValido(correo)) {
     errores.push(
-      "El correo solo puede tener letras o números antes del @. Ej: laura123@gmail.com",
+      "El correo solo puede tener letras o números antes del @. Ej: usuario123@gmail.com",
     );
   }
 
@@ -176,14 +176,14 @@ const validarPasajero = (req, res, next) => {
     errores.push("El nombre es obligatorio.");
   } else if (!esNombreValido(nombre)) {
     errores.push(
-      "El nombre debe tener dos palabras con mayúscula inicial. Ej: Laura Susana",
+      "El nombre debe tener dos palabras con mayúscula inicial. Ej: Nombre Nombre",
     );
   }
 
   if (!noEstaVacio(primer_apellido)) {
     errores.push("El primer apellido es obligatorio.");
   } else if (!esApellidoValido(primer_apellido)) {
-    errores.push("El primer apellido debe iniciar con mayúscula. Ej: García");
+    errores.push("El primer apellido debe iniciar con mayúscula. Ej: Apellido");
   }
 
   if (!noEstaVacio(correo)) {

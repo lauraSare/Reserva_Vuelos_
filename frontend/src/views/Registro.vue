@@ -44,9 +44,9 @@
                                 <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
                                 <circle cx="12" cy="7" r="4" />
                             </svg>
-                            <input type="text" v-model="form.nombre" placeholder="Laura Susana" />
+                            <input type="text" v-model="form.nombre" placeholder="Nombre Nombre" />
                         </div>
-                        <span class="campo-hint">Dos palabras con mayúscula inicial. Ej: Laura Susana</span>
+                        <span class="campo-hint">Dos palabras con mayúscula inicial. Ej: Nombre Nombre</span>
                     </div>
 
                     <!-- Apellidos -->
@@ -59,7 +59,7 @@
                                     <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
                                     <circle cx="12" cy="7" r="4" />
                                 </svg>
-                                <input type="text" v-model="form.primer_apellido" placeholder="García" />
+                                <input type="text" v-model="form.primer_apellido" placeholder="Apellido" />
                             </div>
                         </div>
                         <div class="form-group">
@@ -99,9 +99,9 @@
                                 <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
                                 <polyline points="22,6 12,13 2,6" />
                             </svg>
-                            <input type="email" v-model="form.correo" placeholder="laura123@gmail.com" />
+                            <input type="email" v-model="form.correo" placeholder="usuario123@gmail.com" />
                         </div>
-                        <span class="campo-hint">Solo letras o números antes del @</span>
+                        <span class="campo-hint">Ej: usuario@gmail.com o usuario@gob.mx</span>
                     </div>
 
                     <!-- Teléfono y Pasaporte -->
@@ -303,7 +303,7 @@ const validar = () => {
 
     if (!form.value.nombre.trim()) return 'El nombre es obligatorio.'
     if (!regexNombre.test(form.value.nombre.trim()))
-        return 'El nombre debe tener dos palabras con mayúscula inicial. Ej: Laura Susana'
+        return 'El nombre debe tener dos palabras con mayúscula inicial. Ej: Nombre Nombre'
 
     if (!form.value.primer_apellido.trim()) return 'El primer apellido es obligatorio.'
     if (!regexNombre.test(form.value.primer_apellido.trim()))
@@ -314,10 +314,10 @@ const validar = () => {
 
     if (!form.value.nacionalidad.trim()) return 'La nacionalidad es obligatoria.'
 
-    const regexCorreo = /^[a-zA-Z0-9]+@[a-zA-Z0-9]+\.[a-zA-Z]{2,}$/
+    const regexCorreo = /^[^\s@]+@[^\s@]+\.[a-zA-Z]{2,}$/
     if (!form.value.correo.trim()) return 'El correo es obligatorio.'
     if (!regexCorreo.test(form.value.correo.trim()))
-        return 'El correo solo puede tener letras o números antes del @. Ej: laura123@gmail.com'
+        return 'El correo solo puede tener letras o números antes del @. Ej: usuario123@gmail.com'
 
     const regexTel = /^\d{10}$/
     if (!form.value.telefono.trim()) return 'El teléfono es obligatorio.'

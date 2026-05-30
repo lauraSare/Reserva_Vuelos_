@@ -3,12 +3,41 @@
 </template>
 
 <script setup>
-import { onMounted } from 'vue'
+import { onMounted, onUnmounted } from 'vue'
 import Swal from 'sweetalert2'
+import axios from 'axios'
+
+let pingInterval = null
+let ultimaActividad = Date.now()
+const registrarActividad = () => { ultimaActividad = Date.now() }
 
 onMounted(() => {
-  // Hacer SweetAlert disponible globalmente
   window.Swal = Swal
+  window.addEventListener('mousemove', registrarActividad)
+  window.addEventListener('keydown', registrarActividad)
+  window.addEventListener('click', registrarActividad)
+  window.addEventListener('scroll', registrarActividad)
+
+  pingInterval = setInterval(async () => {
+    try {
+      const usuario = localStorage.getItem('usuario')
+      if (!usuario) return
+      const inactivo = Date.now() - ultimaActividad > 60000
+      if (inactivo) return
+      await axios.get(
+        `${import.meta.env.VITE_API_URL || 'http://localhost:3000'}/api/auth/ping`,
+        { withCredentials: true }
+      )
+    } catch {}
+  }, 60000)
+})
+
+onUnmounted(() => {
+  clearInterval(pingInterval)
+  window.removeEventListener('mousemove', registrarActividad)
+  window.removeEventListener('keydown', registrarActividad)
+  window.removeEventListener('click', registrarActividad)
+  window.removeEventListener('scroll', registrarActividad)
 })
 </script>
 

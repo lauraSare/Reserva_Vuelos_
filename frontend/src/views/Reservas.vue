@@ -75,6 +75,21 @@
                     </svg>
                     <span v-if="!sidebarCollapsed">Aviones</span>
                 </router-link>
+                <router-link to="/grupos" class="nav-item">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="20" height="20">
+                        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                        <circle cx="9" cy="7" r="4"/>
+                        <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+                        <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                        <line x1="19" y1="8" x2="19" y2="14"/>
+                        <line x1="22" y1="11" x2="16" y2="11"/>
+                    </svg>
+                    <span v-if="!sidebarCollapsed">Grupos</span>
+                </router-link>
+                <router-link to="/rutas" class="nav-item">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="20" height="20"><circle cx="6" cy="19" r="3" /><circle cx="18" cy="5" r="3" /><path d="M6 16V7a6 6 0 0 1 6-6" /><path d="M18 8v9a6 6 0 0 1-6 6" /></svg>
+                    <span v-if="!sidebarCollapsed">Rutas</span>
+                </router-link>
             </nav>
             <div class="sidebar-footer" v-if="!sidebarCollapsed">
                 <div class="user-info">
@@ -358,6 +373,13 @@ const inicializarTabla = () => {
                     data: 'id_reserva', orderable: false,
                     render: id => `
                         <div class="action-btns">
+                            <button class="btn-boleto" data-id="${id}" title="Ver boleto">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="15" height="15">
+                                    <path d="M2 9a1 1 0 0 1 0-2V5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v2a1 1 0 0 1 0 2v2a1 1 0 0 1 0 2v2a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2v-2a1 1 0 0 1 0-2V9z"/>
+                                    <line x1="9" y1="12" x2="15" y2="12"/>
+                                    <line x1="12" y1="9" x2="12" y2="15"/>
+                                </svg>
+                            </button>
                             <button class="btn-edit" data-id="${id}" title="Editar">
                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="15" height="15">
                                     <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
@@ -379,6 +401,9 @@ const inicializarTabla = () => {
             pageLength: 10,
             dom: '<"dt-top"lf>rt<"dt-bottom"ip>',
             drawCallback: () => {
+                document.querySelectorAll('.btn-boleto').forEach(btn => {
+                    btn.onclick = () => verBoleto(Number(btn.dataset.id))
+                })
                 document.querySelectorAll('.btn-edit').forEach(btn => {
                     btn.onclick = () => abrirModalEditar(Number(btn.dataset.id))
                 })
@@ -599,9 +624,9 @@ const guardarReserva = async () => {
                 <div style="display:flex;align-items:center;gap:0.4rem;justify-content:center;">
                     <span style="color:#6b5a5a;font-size:0.75rem;width:20px;text-align:right;">${fila}</span>
                     ${asientos.map(a => {
-                        const color = a.estado === 'disponible' ? '#7fd4a0' : a.estado === 'bloqueado' ? '#f0c96b' : '#f08080'
-                        const bg = a.estado === 'disponible' ? 'rgba(46,155,90,0.15)' : a.estado === 'bloqueado' ? 'rgba(201,168,76,0.2)' : 'rgba(155,28,46,0.2)'
-                        return `<button class="swal-asiento-btn"
+        const color = a.estado === 'disponible' ? '#7fd4a0' : a.estado === 'bloqueado' ? '#f0c96b' : '#f08080'
+        const bg = a.estado === 'disponible' ? 'rgba(46,155,90,0.15)' : a.estado === 'bloqueado' ? 'rgba(201,168,76,0.2)' : 'rgba(155,28,46,0.2)'
+        return `<button class="swal-asiento-btn"
                             data-id="${a.id_asiento}" data-num="${a.numero_asiento}" data-estado="${a.estado}"
                             ${a.estado !== 'disponible' ? 'disabled' : ''}
                             style="width:36px;height:36px;border-radius:6px;border:1px solid ${color};
@@ -611,7 +636,7 @@ const guardarReserva = async () => {
                             title="${a.numero_asiento} — ${a.estado}">
                             ${a.numero_asiento.replace(fila, '')}
                         </button>`
-                    }).join('')}
+    }).join('')}
                 </div>
             `).join('')}
         </div>
@@ -644,7 +669,7 @@ const guardarReserva = async () => {
                     btn.style.color = '#c9a84c'
                     window.swalAsientoSeleccionado = { id: btn.dataset.id, num: btn.dataset.num }
                     const label = document.getElementById('asiento-seleccionado-label')
-                    if (label) label.textContent = `Asiento seleccionado: ${ btn.dataset.num } `
+                    if (label) label.textContent = `Asiento seleccionado: ${btn.dataset.num} `
                 })
             })
         }
@@ -663,7 +688,7 @@ const guardarReserva = async () => {
         html: `
     <p style="color:#b89a8a;">Clase: <strong style="color:#c9a84c;">${claseSeleccionada}</strong> — Asiento: <strong style="color:#c9a84c;">${asientoSeleccionado.num}</strong></p>
         <p style="color:#b89a8a;">Precio base: <strong>$${precioBase.toLocaleString()} MXN</strong></p>
-            ${ htmlDescuentos }
+            ${htmlDescuentos}
             <p style="font-size:1.3rem;color:#c9a84c;font-weight:800;margin:1rem 0;">Total: $${precioFinal.toLocaleString()} MXN</p>
             <div style="display:flex;gap:1rem;justify-content:center;margin-top:1rem;">
                 <button id="btn-transferencia" style="padding:0.75rem 1.5rem;background:rgba(201,168,76,0.15);border:1px solid rgba(201,168,76,0.4);border-radius:8px;color:#c9a84c;cursor:pointer;font-family:inherit;font-weight:700;">Transferencia</button>
@@ -708,7 +733,12 @@ const guardarReserva = async () => {
         cerrarModal()
         await cargarReservas()
     } catch (err) {
-        error.value = err.response?.data?.message || 'Error al crear la reserva.'
+        window.Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: err.response?.data?.message || 'Error al crear la reserva.',
+            background: '#1a0c10', color: '#f0e8e0', confirmButtonColor: '#c9a84c'
+        })
     } finally {
         loading.value = false
         window.swalClaseSeleccionada = null
@@ -747,6 +777,291 @@ const confirmarEliminar = async (id) => {
     } catch (err) {
         window.Swal.fire({ icon: 'error', title: 'Error', text: err.response?.data?.message || 'No se pudo eliminar.', background: '#1a0c10', color: '#f0e8e0', confirmButtonColor: '#c9a84c' })
     }
+}
+
+const verBoleto = async (id) => {
+    const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000'
+    try {
+        const res = await fetch(`${API_URL}/api/reservas/${id}/boleto`, { credentials: 'include' })
+        const data = await res.json()
+        if (!res.ok) {
+            const mensajes = {
+                asiento: '<strong>Asiento:</strong> Ve a <em>Vuelos → Asientos</em> y asigna un asiento al vuelo.',
+                pago: '💳 <strong>Pago:</strong> La reserva no tiene un grupo de pago registrado.',
+                tripulación: '<strong>Tripulación:</strong> Ve a <em>Tripulación</em> y asigna pilotos al vuelo de esta reserva.'
+            }
+            const faltantes = data.faltantes || []
+            const htmlFaltantes = faltantes.length > 0
+                ? `<div style="text-align:left;margin-top:1rem;">
+                    <p style="color:#b89a8a;margin-bottom:0.75rem;">Para generar el boleto necesitas completar:</p>
+                    ${faltantes.map(f => `<p style="margin:0.4rem 0;color:#f0e8e0;">${mensajes[f] || f}</p>`).join('')}
+                   </div>`
+                : `<p style="color:#b89a8a;">${data.message}</p>`
+            window.Swal.fire({
+                icon: 'warning',
+                title: 'Boleto incompleto',
+                html: htmlFaltantes,
+                background: '#1a0c10', color: '#f0e8e0', confirmButtonColor: '#c9a84c'
+            })
+            return
+        }
+        const { reserva, tripulacion } = data
+        const piloto = tripulacion.find(t => t.rol === 'piloto')
+        const copiloto = tripulacion.find(t => t.rol === 'copiloto')
+        const resultBoleto = await window.Swal.fire({
+            title: `Boleto #${reserva.id_reserva}`,
+            html: `
+                <div style="text-align:center;margin-bottom:1.25rem;padding-bottom:1rem;border-bottom:1px solid rgba(201,168,76,0.2);">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="#c9a84c" stroke-width="1.5" width="52" height="52">
+                        <path d="M22 16.5H2l4-9h12l4 9z"/>
+                        <path d="M6 16.5l1.5 3h9l1.5-3"/>
+                        <path d="M12 7.5V4m0 0l-2 2m2-2l2 2"/>
+                    </svg>
+                    <p style="color:#c9a84c;font-size:0.75rem;letter-spacing:2px;text-transform:uppercase;margin:0.5rem 0 0;">Aerolínea Quetzal</p>
+                </div>
+                <div style="text-align:left;font-size:0.9rem;line-height:2;">
+                    <p><span style="color:#c9a84c;font-weight:700;">Pasajero:</span> ${reserva.nombre} ${reserva.primer_apellido} ${reserva.segundo_apellido || ''}</p>
+                    <p><span style="color:#c9a84c;font-weight:700;">Pasaporte:</span> ${reserva.num_pasaporte}</p>
+                    <p><span style="color:#c9a84c;font-weight:700;">Vuelo:</span> ${reserva.codigo_vuelo}</p>
+                    <p><span style="color:#c9a84c;font-weight:700;">Origen:</span> ${reserva.origen_ciudad} (${reserva.origen_iata})</p>
+                    <p><span style="color:#c9a84c;font-weight:700;">Destino:</span> ${reserva.destino_ciudad} (${reserva.destino_iata})</p>
+                    <p><span style="color:#c9a84c;font-weight:700;">Salida:</span> ${formatFecha(reserva.fecha_salida)}</p>
+                    <p><span style="color:#c9a84c;font-weight:700;">Llegada:</span> ${formatFecha(reserva.fecha_llegada)}</p>
+                    <p><span style="color:#c9a84c;font-weight:700;">Asiento:</span> ${reserva.numero_asiento} — ${reserva.clase_asiento}</p>
+                    <p><span style="color:#c9a84c;font-weight:700;">Avión:</span> ${reserva.modelo} (${reserva.matricula})</p>
+                    <p><span style="color:#c9a84c;font-weight:700;">Pago:</span> ${reserva.metodo} — $${Number(reserva.monto_total).toLocaleString()} ${reserva.moneda}</p>
+                    ${piloto ? `<p><span style="color:#c9a84c;font-weight:700;">Piloto:</span> ${piloto.nombre} ${piloto.primer_apellido}</p>` : ''}
+                    ${copiloto ? `<p><span style="color:#c9a84c;font-weight:700;">Copiloto:</span> ${copiloto.nombre} ${copiloto.primer_apellido}</p>` : ''}
+                </div>`,
+            background: '#1a0c10', color: '#f0e8e0',
+            confirmButtonText: '📄 Descargar PDF',
+            confirmButtonColor: '#c9a84c',
+            showCancelButton: true,
+            cancelButtonText: 'Cerrar',
+            cancelButtonColor: '#4a3020'
+        })
+        if (resultBoleto.isConfirmed) {
+            await generarPDF(reserva, tripulacion)
+        }
+    } catch {
+        window.Swal.fire({ icon: 'error', title: 'Error', text: 'No se pudo cargar el boleto.', background: '#1a0c10', color: '#f0e8e0', confirmButtonColor: '#c9a84c' })
+    }
+}
+
+const cargarFuenteCinzel = async () => {
+    const url = 'https://raw.githubusercontent.com/google/fonts/main/ofl/cinzel/Cinzel%5Bwght%5D.ttf'
+    const res = await fetch(url)
+    const buffer = await res.arrayBuffer()
+    const bytes = new Uint8Array(buffer)
+    let binary = ''
+    for (let i = 0; i < bytes.byteLength; i++) {
+        binary += String.fromCharCode(bytes[i])
+    }
+    return btoa(binary)
+}
+
+const generarPDF = async (reserva, tripulacion) => {
+    const { jsPDF } = window.jspdf
+    const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: [210, 175] })
+
+    const W = doc.internal.pageSize.getWidth()
+    const H = doc.internal.pageSize.getHeight()
+
+    // Cargar Cinzel al inicio
+    const cinzelBase64 = await cargarFuenteCinzel()
+    doc.addFileToVFS('Cinzel.ttf', cinzelBase64)
+    doc.addFont('Cinzel.ttf', 'Cinzel', 'normal')
+
+    // Fondo vino oscuro
+    doc.setFillColor(15, 5, 8)
+    doc.rect(0, 0, W, H, 'F')
+
+    // Doble borde dorado
+    doc.setDrawColor(90, 60, 10)
+    doc.setLineWidth(2)
+    doc.rect(5, 5, W - 10, H - 10)
+    doc.setDrawColor(201, 168, 76)
+    doc.setLineWidth(0.6)
+    doc.rect(5, 5, W - 10, H - 10)
+    doc.setDrawColor(255, 215, 106)
+    doc.setLineWidth(0.25)
+    doc.rect(7.5, 7.5, W - 15, H - 15)
+
+    // Header con degradado vino rojizo
+    for (let i = 0; i < 18; i++) {
+        const t = i / 18
+        const r = Math.round(80 + (18 - 80) * t)
+        const g = Math.round(10 + (3 - 10) * t)
+        const b = Math.round(20 + (8 - 20) * t)
+        doc.setFillColor(r, g, b)
+        doc.rect(5, 5 + i, W - 10, 1.1, 'F')
+    }
+
+    // Nombre aerolínea
+    doc.setFont('Cinzel', 'normal')
+    doc.setFontSize(13)
+    doc.setTextColor(255, 215, 106)
+    doc.text('AEROLINEA QUETZAL', W / 2, 17, { align: 'center' })
+
+    // Línea dorada separadora
+    doc.setDrawColor(201, 168, 76)
+    doc.setLineWidth(0.4)
+    doc.line(12, 24, W - 12, 24)
+
+    // BOARDING PASS
+    doc.setFontSize(8)
+    doc.setTextColor(180, 154, 138)
+    doc.setFont('Cinzel', 'normal')
+    doc.text('BOARDING PASS', W / 2, 30, { align: 'center' })
+
+    // Nombre pasajero
+    doc.setFontSize(16)
+    doc.setFont('helvetica', 'bold')
+    doc.setTextColor(240, 232, 224)
+    doc.text(`${reserva.nombre} ${reserva.primer_apellido} ${reserva.segundo_apellido || ''}`.trim(), W / 2, 40, { align: 'center' })
+
+    // Ruta MTY ——✈—— MEX
+    doc.setFontSize(30)
+    doc.setTextColor(90, 60, 10)
+    doc.text(reserva.origen_iata, W / 2 - 38.4, 54.4, { align: 'center' })
+    doc.text(reserva.destino_iata, W / 2 + 38.4, 54.4, { align: 'center' })
+    doc.setTextColor(255, 215, 106)
+    doc.text(reserva.origen_iata, W / 2 - 38, 54, { align: 'center' })
+    doc.setTextColor(201, 168, 76)
+    doc.text(reserva.destino_iata, W / 2 + 38, 54, { align: 'center' })
+
+    doc.setFontSize(8)
+    doc.setTextColor(180, 154, 138)
+    doc.text(reserva.origen_ciudad, W / 2 - 38, 59, { align: 'center' })
+    doc.text(reserva.destino_ciudad, W / 2 + 38, 59, { align: 'center' })
+
+    // Flecha
+    doc.setDrawColor(201, 168, 76)
+    doc.setLineWidth(0.3)
+    doc.line(W / 2 - 22, 52, W / 2 + 22, 52)
+    doc.setFillColor(201, 168, 76)
+    doc.triangle(W / 2 + 22, 52, W / 2 + 18, 50, W / 2 + 18, 54, 'F')
+
+    // Línea separadora
+    doc.setDrawColor(201, 168, 76)
+    doc.setLineWidth(0.2)
+    doc.line(12, 63, W - 12, 63)
+
+    // Datos en 3 columnas
+    const col1 = 20, col2 = W / 2, col3 = W - 20
+    const labelY = 70, valueY = 75
+
+    // Col 1 — Salida
+    doc.setFontSize(7)
+    doc.setTextColor(180, 154, 138)
+    doc.setFont('helvetica', 'normal')
+    doc.text('SALIDA', col1, labelY)
+    doc.setFontSize(9)
+    doc.setTextColor(240, 232, 224)
+    doc.setFont('helvetica', 'bold')
+    doc.text(formatFecha(reserva.fecha_salida), col1, valueY)
+
+    // Col 2 — Vuelo / Clase
+    doc.setFontSize(7)
+    doc.setTextColor(180, 154, 138)
+    doc.setFont('helvetica', 'normal')
+    doc.text('VUELO / CLASE', col2, labelY, { align: 'center' })
+    doc.setFontSize(9)
+    doc.setTextColor(240, 232, 224)
+    doc.setFont('helvetica', 'bold')
+    doc.text(`${reserva.codigo_vuelo}  •  ${reserva.clase_asiento.toUpperCase()}`, col2, valueY, { align: 'center' })
+
+    // Col 3 — Asiento
+    doc.setFontSize(7)
+    doc.setTextColor(180, 154, 138)
+    doc.setFont('helvetica', 'normal')
+    doc.text('ASIENTO', col3, labelY, { align: 'right' })
+    doc.setFontSize(14)
+    doc.setTextColor(201, 168, 76)
+    doc.setFont('helvetica', 'bold')
+    doc.text(reserva.numero_asiento, col3, valueY + 2, { align: 'right' })
+
+    // Línea separadora
+    doc.setDrawColor(201, 168, 76)
+    doc.setLineWidth(0.2)
+    doc.line(12, 82, W - 12, 82)
+
+    // Piloto y avión
+    const piloto = tripulacion.find(t => t.rol === 'piloto')
+    const copiloto = tripulacion.find(t => t.rol === 'copiloto')
+
+    doc.setFontSize(7)
+    doc.setTextColor(180, 154, 138)
+    doc.setFont('helvetica', 'normal')
+    doc.text('PILOTO', col1, 88)
+    doc.setFontSize(8)
+    doc.setTextColor(240, 232, 224)
+    doc.setFont('helvetica', 'bold')
+    doc.text(piloto ? `${piloto.nombre} ${piloto.primer_apellido}` : '—', col1, 93)
+
+    doc.setFontSize(7)
+    doc.setTextColor(180, 154, 138)
+    doc.setFont('helvetica', 'normal')
+    doc.text('AVIÓN', col2, 88, { align: 'center' })
+    doc.setFontSize(8)
+    doc.setTextColor(240, 232, 224)
+    doc.setFont('helvetica', 'bold')
+    doc.text(`${reserva.modelo} (${reserva.matricula})`, col2, 93, { align: 'center' })
+
+    doc.setFontSize(7)
+    doc.setTextColor(180, 154, 138)
+    doc.setFont('helvetica', 'normal')
+    doc.text('PAGO', col3, 88, { align: 'right' })
+    doc.setFontSize(8)
+    doc.setTextColor(240, 232, 224)
+    doc.setFont('helvetica', 'bold')
+    doc.text(`${reserva.metodo} — $${Number(reserva.monto_total).toLocaleString()} ${reserva.moneda}`, col3, 93, { align: 'right' })
+
+    // Línea dorada final (una sola)
+    doc.setDrawColor(201, 168, 76)
+    doc.setLineWidth(0.4)
+    doc.line(12, 98, W - 12, 98)
+
+    // Línea separadora antes del slogan
+    doc.setDrawColor(201, 168, 76)
+    doc.setLineWidth(0.3)
+    doc.line(12, 106, W - 12, 106)
+
+    // Pasaporte
+    doc.setFontSize(7)
+    doc.setTextColor(180, 154, 138)
+    doc.setFont('helvetica', 'normal')
+    doc.text(`PASAPORTE: ${reserva.num_pasaporte}   •   LLEGADA: ${formatFecha(reserva.fecha_llegada)}`, W / 2, 104, { align: 'center' })
+
+    // Slogan línea 1
+    doc.setFontSize(13)
+    doc.setTextColor(255, 215, 106)
+    doc.setFont('Cinzel', 'normal')
+    doc.text('QUETZAL: PRECISION, CONFORT Y DESTINO.', W / 2, 113, { align: 'center' })
+
+    // Slogan línea 2
+    doc.setFontSize(9)
+    doc.setTextColor(201, 168, 76)
+    doc.setFont('Cinzel', 'normal')
+    doc.text('SU EXPERIENCIA DE VUELO, NUESTRA MAYOR DISTINCION.', W / 2, 121, { align: 'center' })
+
+    // QR — escanea para acceder al sistema web
+    const qrDataUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&color=c9a84c&bgcolor=0f0508&data=${encodeURIComponent('https://TU-LINK.onrender.com')}`
+    const qrRes = await fetch(qrDataUrl)
+    const qrBlob = await qrRes.blob()
+    const qrBase64 = await new Promise(resolve => {
+        const reader = new FileReader()
+        reader.onload = () => resolve(reader.result)
+        reader.readAsDataURL(qrBlob)
+    })
+    doc.addImage(qrBase64, 'PNG', W / 2 - 9, 125, 18, 18)
+    doc.setFontSize(5.5)
+    doc.setTextColor(180, 154, 138)
+    doc.setFont('helvetica', 'normal')
+    doc.text('Escanea para acceder al sistema', W / 2, 145, { align: 'center' })
+
+    // Guardar
+    doc.save(`boleto-quetzal-${reserva.id_reserva}.pdf`)
 }
 
 const handleLogout = async () => {
@@ -844,6 +1159,7 @@ onMounted(async () => {
     display: flex;
     flex-direction: column;
     gap: 0.4rem;
+    overflow-y: auto;
 }
 
 .nav-item {
@@ -1226,6 +1542,24 @@ onMounted(async () => {
 
 :deep(.btn-delete:hover) {
     background: rgba(155, 28, 46, 0.3);
+}
+
+:deep(.btn-boleto) {
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s;
+    background: rgba(46, 155, 90, 0.12);
+    color: #7fd4a0;
+}
+
+:deep(.btn-boleto:hover) {
+    background: rgba(46, 155, 90, 0.28);
 }
 
 .modal-overlay {

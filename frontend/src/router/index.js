@@ -12,6 +12,7 @@ import Tripulacion from "../views/Tripulacion.vue";
 import NotFound from "../views/NotFound.vue";
 import Aviones from "../views/Aviones.vue";
 import Rutas from "../views/Rutas.vue";
+import Grupos from "../views/Grupos.vue";
 
 const routes = [
   // ─── Rutas públicas ───────────────────────────────────────
@@ -72,6 +73,12 @@ const routes = [
     path: "/rutas",
     name: "Rutas",
     component: Rutas,
+    meta: { requiresAuth: true },
+  },
+  {
+    path: "/grupos",
+    name: "Grupos",
+    component: Grupos,
     meta: { requiresAuth: true },
   },
 

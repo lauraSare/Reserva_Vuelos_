@@ -177,7 +177,17 @@ const eliminarVuelo = async (req, res) => {
         .status(400)
         .json({ message: "Solo se pueden eliminar vuelos cancelados." });
     }
+    // Verificar si tiene reservas antes de eliminar
+    const { Reserva, sequelize } = require("../models/index");
+    const totalReservas = await Reserva.count({ where: { id_vuelo: id } });
+    if (totalReservas > 0) {
+      return res.status(400).json({ 
+        message: `Este vuelo tiene ${totalReservas} reserva(s). Ve a la sección de Reservas y elimínalas primero.` 
+      });
+    }
+    // Eliminar registros dependientes antes de eliminar el vuelo
     await VueloTripulacion.destroy({ where: { id_vuelo: id } });
+    await sequelize.query(`DELETE FROM vuelo_asientos WHERE id_vuelo = :id`, { replacements: { id } });
     await vuelo.destroy();
     res.json({ message: "Vuelo eliminado correctamente." });
   } catch (error) {

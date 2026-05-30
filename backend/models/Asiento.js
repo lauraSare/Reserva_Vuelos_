@@ -1,34 +1,33 @@
-// Modelo de Asiento — representa los asientos físicos de cada avión
-// La disponibilidad por vuelo se maneja en vuelo_asientos (tabla intermedia)
-// Principio SOLID: Single Responsibility — solo maneja datos del asiento
+// Modelo de VueloAsiento — tabla intermedia que maneja disponibilidad por vuelo
+// Principio SOLID: Single Responsibility — solo maneja el estado del asiento en un vuelo
 const { DataTypes } = require("sequelize");
 const sequelize = require("../config/database");
 
-const Asiento = sequelize.define(
-  "Asiento",
+const VueloAsiento = sequelize.define(
+  "VueloAsiento",
   {
-    id_asiento: {
+    id_vuelo_asiento: {
       type: DataTypes.INTEGER,
       primaryKey: true,
       autoIncrement: true,
     },
-    numero_asiento: {
-      type: DataTypes.STRING(45),
-      allowNull: false, // Ej. 1A, 2B, 12C
-    },
-    clase: {
-      type: DataTypes.ENUM("turista", "ejecutiva", "primera_clase"),
+    id_vuelo: {
+      type: DataTypes.INTEGER,
       allowNull: false,
     },
-    id_avion: {
+    id_asiento: {
       type: DataTypes.INTEGER,
-      allowNull: false, // FK hacia aviones
+      allowNull: false,
+    },
+    estado: {
+      type: DataTypes.ENUM("disponible", "ocupado", "bloqueado"),
+      defaultValue: "disponible",
     },
   },
   {
-    tableName: "asientos",
+    tableName: "vuelo_asientos",
     timestamps: false,
   },
 );
 
-module.exports = Asiento;
+module.exports = VueloAsiento;
