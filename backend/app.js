@@ -71,10 +71,11 @@ app.use(
     saveUninitialized: false,
     store: sessionStore,
     cookie: {
-      secure: false,
+      secure: true,
       httpOnly: true,
       maxAge: 5 * 60 * 1000,
       rolling: true,
+      sameSite: 'none',
     },
   }),
 );
