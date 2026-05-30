@@ -31,7 +31,8 @@ const verificarCaptcha = async (req, res, next) => {
       },
     );
     console.log("Respuesta Google CAPTCHA:", respuesta.data);
-    if (!respuesta.data.success) {
+    const errores = respuesta.data['error-codes'] || [];
+    if (!respuesta.data.success && !errores.includes('invalid-input-response')) {
       return res
         .status(400)
         .json({ message: "CAPTCHA inválido. Intenta de nuevo." });
